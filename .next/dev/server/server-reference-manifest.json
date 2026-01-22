@@ -1,0 +1,43 @@
+{
+  "node": {
+    "0014052bf495dd0b685d64ad62e586c74101f6928d": {
+      "workers": {
+        "app/(dashboard)/dashboard/analytics/page": {
+          "moduleId": "[project]/.next-internal/server/app/(dashboard)/dashboard/analytics/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/analytics.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getOverallAnalytics",
+          "filename": "src/actions/analytics.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/dashboard/analytics/page": "action-browser"
+      },
+      "filename": "src/actions/analytics.ts",
+      "exportedName": "getOverallAnalytics"
+    },
+    "4075baf4163fd219b3dc28321f8b9138c3f8b5acc3": {
+      "workers": {
+        "app/(dashboard)/dashboard/generalchat/page": {
+          "moduleId": "[project]/.next-internal/server/app/(dashboard)/dashboard/generalchat/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/chat.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getAiResponse",
+          "filename": "src/actions/chat.ts"
+        },
+        "app/(dashboard)/dashboard/practice/[ID]/page": {
+          "moduleId": "[project]/.next-internal/server/app/(dashboard)/dashboard/practice/[ID]/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/actions/chat.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getAiResponse",
+          "filename": "src/actions/chat.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/dashboard/generalchat/page": "action-browser",
+        "app/(dashboard)/dashboard/practice/[ID]/page": "action-browser"
+      },
+      "filename": "src/actions/chat.ts",
+      "exportedName": "getAiResponse"
+    }
+  },
+  "edge": {},
+  "encryptionKey": "6NO3OQGygvwYyHDGAE6YK32eqEsJIm9YbNuydA554TA="
+}
