@@ -12,10 +12,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const client = await clientPromise;
         const db = client.db("mirrorDB");
-        
+
         // Find user by email
-        const user = await db.collection("users").findOne({ 
-          email: (credentials.email as string).toLowerCase() 
+        const user = await db.collection("users").findOne({
+          email: (credentials.email as string).toLowerCase(),
         });
 
         if (!user || !user.password) return null;
@@ -23,7 +23,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Verify password
         const isPasswordCorrect = await bcrypt.compare(
           credentials.password as string,
-          user.password
+          user.password,
         );
 
         if (!isPasswordCorrect) return null;
@@ -34,7 +34,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: user._id.toString(),
           name: user.name,
           email: user.email,
-          lifeStage: user.lifeStage, 
+          lifeStage: user.lifeStage,
         };
       },
     }),
@@ -51,7 +51,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // 2. Session Callback: Makes the data available to your Server & Client components
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id;
+        session.user.id = token.id as string;
         session.user.lifeStage = token.lifeStage as string;
       }
       return session;

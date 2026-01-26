@@ -1,4 +1,4 @@
-// src/middleware.ts
+// src/proxy.ts
 import { auth } from "@/auth";
 
 export default auth((req) => {

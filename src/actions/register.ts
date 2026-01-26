@@ -12,7 +12,7 @@ export async function registerUser(formData: FormData) {
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const lifeStage = formData.get("lifeStage") as string; // Crucial for Gemini Prompting
+  const lifeStage = formData.get("lifeStage") as string; // Crucial for Groq Prompting
 
   // 2. Initial Validation
   if (!name || !email || !password || !lifeStage) {
@@ -28,8 +28,8 @@ export async function registerUser(formData: FormData) {
     const db = client.db("mirrorDB"); // Keeping consistent with chat logic
 
     // 3. Check for existing user (Email normalization)
-    const existingUser = await db.collection("users").findOne({ 
-      email: email.toLowerCase() 
+    const existingUser = await db.collection("users").findOne({
+      email: email.toLowerCase(),
     });
 
     if (existingUser) {
@@ -53,7 +53,6 @@ export async function registerUser(formData: FormData) {
 
     // 6. Return success to trigger the redirect to /login
     return { success: true };
-
   } catch (error) {
     console.error("Registration Database Error:", error);
     return { error: "System error during registration. Please try again." };
