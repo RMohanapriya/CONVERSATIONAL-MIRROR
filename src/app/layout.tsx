@@ -1,24 +1,25 @@
 import type { Metadata } from "next";
-import { Inter, Montserrat } from "next/font/google"; 
+import { Inter, Montserrat } from "next/font/google";
 import { Providers } from "@/components/Providers";
 import "./globals.css";
 
 // 1. FONT CONFIGURATION
-const inter = Inter({ 
-  subsets: ["latin"], 
+const inter = Inter({
+  subsets: ["latin"],
   variable: "--font-inter",
-  display: 'swap', 
+  display: "swap",
 });
 
-const montserrat = Montserrat({ 
-  subsets: ["latin"], 
+const montserrat = Montserrat({
+  subsets: ["latin"],
   variable: "--font-montserrat",
-  display: 'swap',
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Mirror AI | Social Metacognition Platform",
-  description: "A non-judgmental space for neurodivergent social practice and reflection.",
+  description:
+    "A non-judgmental space for neurodivergent social practice and reflection.",
 };
 
 export default function RootLayout({
@@ -28,7 +29,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning className="scroll-smooth">
-      <body 
+      <body
         className={`
           ${inter.variable} 
           ${montserrat.variable} 
@@ -45,7 +46,7 @@ export default function RootLayout({
           {/* This div replaces the old 'main' flex centering from globals.css.
             It ensures content stays at the top but is correctly spaced.
           */}
-          <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+          <div className="relative h-screen w-full flex flex-col overflow-x-hidden">
             {children}
           </div>
         </Providers>
