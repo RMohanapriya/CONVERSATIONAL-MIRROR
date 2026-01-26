@@ -5,26 +5,26 @@
 @layer base {
   :root {
     /* --- ASD-FRIENDLY COLOR PALETTE (Low Arousal) --- */
-    
+
     /* Background: A soft, cool off-white that absorbs glare */
-    --background: 210 40% 98%;    /* HSL equivalent of #F8FAFC */
-    --foreground: 222 47% 11%;    /* Deep Slate (#0F172A) - softer than black */
-    
+    --background: 210 40% 98%; /* HSL equivalent of #F8FAFC */
+    --foreground: 222 47% 11%; /* Deep Slate (#0F172A) - softer than black */
+
     /* Card: Pure white to provide subtle elevation against the background */
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
-    
+
     /* Primary: Muted Blue 600 - trustworthy and focused, not overstimulating */
-    --primary: 221 83% 53%;       
+    --primary: 221 83% 53%;
     --primary-foreground: 210 40% 98%;
-    
+
     /* Muted: Light grey-blue for secondary information or disabled states */
     --muted: 210 40% 96%;
     --muted-foreground: 215 16% 47%;
-    
+
     /* Border: Subtle slate to define areas without high-contrast lines */
     --border: 214 32% 91%;
-    
+
     /* Soft Contrast Radius: Extra rounded for a gentle, approachable feel */
     --radius: 2rem;
   }
@@ -37,7 +37,9 @@
   body {
     @apply bg-background text-foreground antialiased;
     /* Typography settings for high legibility and clear character rendering */
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
     line-height: 1.6;
   }
 }
