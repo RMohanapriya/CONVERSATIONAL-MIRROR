@@ -6,77 +6,114 @@ import Groq from "groq-sdk";
 
 export async function getAiResponse({
   message,
-  lifeStage,
   scenarioId,
-  scenarioContext,
-  isPractice,
 }: {
   message: string;
-  lifeStage: string;
   scenarioId?: string;
-  scenarioContext?: string;
-  isPractice?: boolean;
 }) {
   const session = await auth();
   if (!session?.user) throw new Error("User must be authenticated.");
 
   const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    return {
-      reflection: "The mirror is currently disconnected.",
-      reassurance: "The Groq API key is missing.",
-      suggestion: "Check your .env.local file for GROQ_API_KEY."
-    };
-  }
+  if (!apiKey) throw new Error("Missing GROQ_API_KEY environment variable.");
 
   const groq = new Groq({ apiKey });
 
   try {
-    const systemInstruction = `You are the 'Social Mirror' (AI Social Coach). 
-  Goal: Decode subtext for ASD Level 1 users. 
-  ${isPractice ? `Scenario: ${scenarioId}. Context: ${scenarioContext}.` : ""}
-  IMPORTANT: Return ONLY a valid JSON object with keys: "reflection", "reassurance", and "suggestion".`;
+    const client = await clientPromise;
+    const db = client.db("mirrorDB");
+
+    // 1. CONTEXT RETRIEVAL (Social Memory)
+    const pastMessages = await db
+      .collection("chat_history")
+      .find({ userId: session.user.id, scenarioId })
+      .sort({ timestamp: -1 })
+      .limit(6)
+      .toArray();
+
+    const history = pastMessages.reverse().flatMap((doc) => [
+      { role: "user", content: doc.userMessage },
+      {
+        role: "assistant",
+        content: Object.values(doc.aiResponse)
+          .filter((v) => typeof v === "string" && v.trim() !== "")
+          .join(" "),
+      },
+    ]);
+
+    // 2. IMPROVED SYSTEM INSTRUCTION
+    const systemInstruction = `
+ROLE: Structured assistant for an ASD Level 1 metacognitive practice platform.
+THIS IS NOT THERAPY.
+
+STRICT RULE: Identify user intent and respond using ONLY ONE MODE.
+
+MODES:
+
+1. UNDERSTANDING (User describes a situation)
+- Purpose: Anchor the social situation calmly.
+- Do NOT paraphrase the user sentence-by-sentence.
+- Do NOT repeat the user’s exact wording.
+- Focus on WHAT is happening socially, not emotions.
+- Use ONE grounding sentence with varied phrasing.
+
+2. REFLECTION (User asks if right/wrong or expresses confusion)
+- Ask ONLY ONE reflective question.
+- Focus on thought process or interpretation.
+- No advice, no summary.
+
+3. GUIDANCE (User asks what to do next)
+- Provide 1–2 simple, practical suggestions.
+- No questions, no summary.
+
+4. CLOSURE (User gives short confirmation like "ok", "alright", "thanks")
+- Briefly acknowledge the plan.
+- End the turn naturally.
+
+JSON FORMAT:
+{ "summary": "...", "inquiry": "", "suggestion": "" }
+
+HARD RULES:
+- Only ONE field may be populated.
+- All other fields MUST be empty strings.
+- Phase 1 and Phase 4 output go into "summary".
+- If message is 1–3 words ("ok", "yes", "alright", "thanks"), ALWAYS use CLOSURE mode.
+- If more than one field is populated → INVALID response.
+
+GLOBAL STYLE:
+- Calm, simple, neutral language.
+- Avoid reassurance and clinical phrasing.
+- Avoid repeating sentence patterns across turns.
+`;
+
+    // 3. INFERENCE
     const chatCompletion = await groq.chat.completions.create({
       messages: [
         { role: "system", content: systemInstruction },
-        { role: "user", content: `Life Stage: ${lifeStage}. Input: ${message || "Analyze this situation."}` },
+        ...history,
+        { role: "user", content: message },
       ],
       model: "llama-3.3-70b-versatile",
       response_format: { type: "json_object" },
-      temperature: 0.7,
+      temperature: 0.1,
     });
 
-    const text = chatCompletion.choices[0]?.message?.content;
-    if (!text) throw new Error("EMPTY_RESPONSE");
+    const data = JSON.parse(
+      chatCompletion.choices[0]?.message?.content || "{}"
+    );
 
-    const data = JSON.parse(text);
-
-    // --- PERSISTENCE ---
-    const client = await clientPromise;
-    const db = client.db("mirrorDB"); 
-    
-    const chatDoc = {
+    // 4. SAVE
+    await db.collection("chat_history").insertOne({
       userId: session.user.id,
-      lifeStage,
+      scenarioId,
       userMessage: message,
       aiResponse: data,
-      timestamp: new Date(), // This is a Date object (not plain)
-    };
+      timestamp: new Date(),
+    });
 
-    await db.collection("chat_history").insertOne(chatDoc);
-
-    // --- THE FIX: SERIALIZATION ---
-    // We use the JSON trick to convert Dates and ObjectIds into plain strings
-    // before passing them back to the Client Component.
-    return JSON.parse(JSON.stringify(data));
-
-  } catch (error: any) {
-    console.error("Mirror Engine Error:", error);
-    
-    return {
-      reflection: "The mirror is momentarily hazy.",
-      reassurance: "Technical static happens, but your effort is valued.",
-      suggestion: "Wait 10 seconds and try refreshing your reflection."
-    };
+    return data;
+  } catch (error) {
+    console.error("Mirror Error:", error);
+    return { summary: "System recalibrating.", inquiry: "", suggestion: "" };
   }
 }
