@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, Bot, User, Loader2, Paperclip, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-// IMPORT your server action here
 import { getAiResponse } from "@/actions/chat";
 
 export function GeneralChat({ lifeStage }: { lifeStage: string }) {
@@ -13,9 +12,6 @@ export function GeneralChat({ lifeStage }: { lifeStage: string }) {
     {
       role: "ai",
       content: `Hello! I'm your Mirror. Calibrated for ${lifeStage}. What's on your mind?`,
-      // Add structured data fields to match AI output
-      reflection: "",
-      reassurance: "",
       suggestion: "",
     },
   ]);
@@ -44,8 +40,6 @@ export function GeneralChat({ lifeStage }: { lifeStage: string }) {
       {
         role: "user",
         content: userMsg,
-        reflection: "",
-        reassurance: "",
         suggestion: "",
       },
     ]);
@@ -55,10 +49,11 @@ export function GeneralChat({ lifeStage }: { lifeStage: string }) {
       // FIX: Call the Server Action directly instead of using fetch
       const data = await getAiResponse({
         message: userMsg,
-        lifeStage: lifeStage,
+        lifeStage:
+          lifeStage === "school" || lifeStage === "college"
+            ? lifeStage
+            : "adult",
         scenarioId: "General Chat",
-        scenarioContext: "Social Sandbox",
-        isPractice: false,
       });
 
       // Handle the structured JSON response
@@ -66,9 +61,7 @@ export function GeneralChat({ lifeStage }: { lifeStage: string }) {
         ...prev,
         {
           role: "ai",
-          content: data.reflection, // Main text
-          reflection: data.reflection,
-          reassurance: data.reassurance,
+          content: data.summary, // Main AI output
           suggestion: data.suggestion,
         },
       ]);
@@ -78,8 +71,6 @@ export function GeneralChat({ lifeStage }: { lifeStage: string }) {
         {
           role: "ai",
           content: "The mirror is momentarily hazy. Please try again.",
-          reflection: "",
-          reassurance: "",
           suggestion: "",
         },
       ]);

@@ -16,6 +16,26 @@ const NO_REGEX = /^(no|not now|nothing|skip)$/i;
 const STOP_REGEX = /^(stop|exit)$/i;
 const UNDERSTOOD_REGEX = /^(ok|okay|i understood|got it)$/i;
 
+function safeParseAIResponse(content: string | null): AIResponse {
+  if (!content) {
+    return {
+      summary: "",
+      inquiry: "",
+      suggestion: "",
+    };
+  }
+
+  try {
+    return JSON.parse(content) as AIResponse;
+  } catch {
+    return {
+      summary: "",
+      inquiry: "",
+      suggestion: "",
+    };
+  }
+}
+
 export async function getAiResponse({
   message,
   scenarioId,
@@ -55,7 +75,14 @@ export async function getAiResponse({
       suggestion: "",
     };
 
-    await saveTurn(db, session.user.id, resolvedScenarioId, message, closure, "CLOSED");
+    await saveTurn(
+      db,
+      session.user.id,
+      resolvedScenarioId,
+      message,
+      closure,
+      "CLOSED",
+    );
     return closure;
   }
 
@@ -71,12 +98,23 @@ export async function getAiResponse({
       suggestion: "",
     };
 
-    await saveTurn(db, session.user.id, resolvedScenarioId, message, response, "AWAIT_SCENARIO", mode);
+    await saveTurn(
+      db,
+      session.user.id,
+      resolvedScenarioId,
+      message,
+      response,
+      "AWAIT_SCENARIO",
+      mode,
+    );
     return response;
   }
 
   /* ---------- PAST: QUESTION ---------- */
-  if (lastTurn?.stage === "AWAIT_SCENARIO" && lastTurn.scenarioType === "PAST") {
+  if (
+    lastTurn?.stage === "AWAIT_SCENARIO" &&
+    lastTurn.scenarioType === "PAST"
+  ) {
     const question: AIResponse = {
       summary: "",
       inquiry:
@@ -86,7 +124,15 @@ export async function getAiResponse({
       suggestion: "",
     };
 
-    await saveTurn(db, session.user.id, resolvedScenarioId, message, question, "QUESTION", "PAST");
+    await saveTurn(
+      db,
+      session.user.id,
+      resolvedScenarioId,
+      message,
+      question,
+      "QUESTION",
+      "PAST",
+    );
     return question;
   }
 
@@ -121,10 +167,20 @@ Populate ONLY summary.
       ],
     });
 
-    const reflection: AIResponse = JSON.parse(completion.choices[0].message.content);
+    const reflection: AIResponse = safeParseAIResponse(
+      completion.choices[0].message.content,
+    );
     reflection.summary += "\n\nWould you like a suggestion?";
 
-    await saveTurn(db, session.user.id, resolvedScenarioId, message, reflection, "ASK_SUGGESTION", "PAST");
+    await saveTurn(
+      db,
+      session.user.id,
+      resolvedScenarioId,
+      message,
+      reflection,
+      "ASK_SUGGESTION",
+      "PAST",
+    );
     return reflection;
   }
 
@@ -157,22 +213,42 @@ Populate ONLY suggestion.
       ],
     });
 
-    const suggestion: AIResponse = JSON.parse(completion.choices[0].message.content);
-    suggestion.suggestion += "\n\nIs there anything else you'd like to discuss?";
+    const suggestion: AIResponse = safeParseAIResponse(
+      completion.choices[0].message.content,
+    );
+    suggestion.suggestion +=
+      "\n\nIs there anything else you'd like to discuss?";
 
-    await saveTurn(db, session.user.id, resolvedScenarioId, message, suggestion, "FOLLOW_UP", "PAST");
+    await saveTurn(
+      db,
+      session.user.id,
+      resolvedScenarioId,
+      message,
+      suggestion,
+      "FOLLOW_UP",
+      "PAST",
+    );
     return suggestion;
   }
 
   /* ---------- LOOP ---------- */
   if (lastTurn?.stage === "FOLLOW_UP" && YES_REGEX.test(message.trim())) {
     const response: AIResponse = {
-      summary: "Okay. Please describe the next past situation you’d like to talk about.",
+      summary:
+        "Okay. Please describe the next past situation you’d like to talk about.",
       inquiry: "",
       suggestion: "",
     };
 
-    await saveTurn(db, session.user.id, resolvedScenarioId, message, response, "AWAIT_SCENARIO", "PAST");
+    await saveTurn(
+      db,
+      session.user.id,
+      resolvedScenarioId,
+      message,
+      response,
+      "AWAIT_SCENARIO",
+      "PAST",
+    );
     return response;
   }
 
@@ -191,7 +267,7 @@ async function saveTurn(
   userMessage: string,
   aiResponse: AIResponse,
   stage: string,
-  scenarioType?: string
+  scenarioType?: string,
 ) {
   await db.collection("chat_history").insertOne({
     userId,

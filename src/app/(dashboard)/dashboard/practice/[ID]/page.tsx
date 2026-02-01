@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { redirect, notFound } from "next/navigation";
-import { PracticeDashboard } from "./PracticeDashboard"; 
+import { PracticeDashboard } from "./PracticeDashboard";
 import { PRACTICE_LIBRARY } from "../library";
 
 interface PageProps {
@@ -15,8 +15,10 @@ export default async function ScenarioSessionPage({ params }: PageProps) {
   const { ID } = await params;
 
   // 2. Identify User's Life Stage
-  const userStage = ((session.user as any).lifeStage || "college").toLowerCase();
-  
+  const userStage = (
+    (session.user as any).lifeStage || "college"
+  ).toLowerCase();
+
   // 3. Navigate the Scenario Library
   const stageData = PRACTICE_LIBRARY[userStage] || PRACTICE_LIBRARY.college;
   const allScenarios = Object.values(stageData).flat();
@@ -32,7 +34,6 @@ export default async function ScenarioSessionPage({ params }: PageProps) {
     <div className="h-screen bg-[#F8FAFC]">
       {/* 5. Initialize the Client-Side Behavioral Coach */}
       <PracticeDashboard
-        userStage={userStage}
         scenarioId={scenario.id}
         scenarioTitle={scenario.title}
         scenarioContext={scenario.context}
