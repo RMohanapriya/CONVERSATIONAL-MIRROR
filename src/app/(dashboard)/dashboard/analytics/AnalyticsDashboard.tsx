@@ -13,11 +13,7 @@ import {
   ShieldCheck,
   ArrowLeft,
   BarChart3,
-  CheckCircle2,
-  Clock,
-  Globe,
   Flame,
-  TrendingUp,
   Info,
 } from "lucide-react";
 
