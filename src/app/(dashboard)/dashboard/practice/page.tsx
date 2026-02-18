@@ -1,18 +1,20 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { PRACTICE_LIBRARY } from "./library"; 
+import { PRACTICE_LIBRARY } from "./library";
+import { normalizeLifeStageForLibrary } from "@/lib/utils";
 
 export default async function PracticeEntryPage() {
   const session = await auth();
   if (!session) redirect("/login");
 
-  const userStage = (session.user as any).lifeStage?.toLowerCase() || "college";
-  const stageData = PRACTICE_LIBRARY[userStage] || PRACTICE_LIBRARY.college;
+  const rawStage = (session.user as any).lifeStage ?? "college";
+  const normalizedStage = normalizeLifeStageForLibrary(rawStage);
 
-  // Flatten the library to pick any random scenario
+  const stageData =
+    PRACTICE_LIBRARY[normalizedStage] ?? PRACTICE_LIBRARY.college;
   const allScenarios = Object.values(stageData).flat();
-  const randomScenario = allScenarios[Math.floor(Math.random() * allScenarios.length)];
+  const randomScenario =
+    allScenarios[Math.floor(Math.random() * allScenarios.length)];
 
-  // Jump to the dynamic session page
   redirect(`/dashboard/practice/${randomScenario.id}`);
 }

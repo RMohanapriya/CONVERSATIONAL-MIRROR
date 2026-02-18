@@ -1,18 +1,15 @@
 "use server";
 
 import Groq from "groq-sdk";
+import type { PracticeResponse } from "../../types";
 
-/**
- * getPracticeResponse:
- * The Behavioral Coach core logic. Evaluates user social attempts against a mission context.
- */
 export async function getPracticeResponse({
   userMessage,
   scenarioContext,
 }: {
   userMessage: string;
   scenarioContext: string;
-}) {
+}): Promise<PracticeResponse> {
   if (!process.env.GROQ_API_KEY) {
     throw new Error("Missing GROQ_API_KEY configuration.");
   }
@@ -38,9 +35,10 @@ SUCCESS CASE (Effective Communication):
 - isSuccessful: true.
 
 IMPROVEMENT CASE (Ineffective/Unclear):
-- reflection: Explain the specific social limitation or "hidden rule" missed.
+- reflection: Explain the specific social limitation or hidden rule missed.
 - suggestion: Provide a single sentence the user can say aloud.
-- suggestion MUST: NOT use "Try saying...", "I can...", or "You should...". Start the dialogue directly.
+- suggestion MUST NOT use "Try saying...", "I can...", or "You should...".
+- Start the dialogue directly.
 - isSuccessful: false.
 
 OUTPUT JSON ONLY:
@@ -59,20 +57,18 @@ OUTPUT JSON ONLY:
       ],
       model: "llama-3.3-70b-versatile",
       response_format: { type: "json_object" },
-      temperature: 0.15, // Low temperature for high consistency/determinism
+      temperature: 0.15,
     });
 
     const content = chatCompletion.choices[0]?.message?.content;
-
     if (!content) throw new Error("AI failed to return content.");
 
-    return JSON.parse(content);
-
+    return JSON.parse(content) as PracticeResponse;
   } catch (error) {
     console.error("Coach Logic Error:", error);
-    // Bulletproof Fallback
     return {
-      reflection: "The coach is currently refining its insight. Please try your response again.",
+      reflection:
+        "The coach is currently refining its insight. Please try your response again.",
       suggestion: "Excuse me, could you repeat that?",
       isSuccessful: false,
     };

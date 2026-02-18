@@ -1,24 +1,19 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { AnalyticsDashboard } from "./AnalyticsDashboard";
+import { getOverallAnalytics } from "@/actions/analytics";
 
-/**
- * AnalyticsPage - Server Component
- * * This component acts as the entry point for the Progress Mirror.
- * It manages authentication and extracts the user's life stage
- * to provide context-aware social growth metrics.
- */
 export default async function AnalyticsPage() {
   const session = await auth();
-  if (!session) {
-    redirect("/login");
-  }
+  if (!session) redirect("/login");
 
+  // Fetch on the server - eliminates client waterfall
+  const data = await getOverallAnalytics();
   const userStage = (session.user as any).lifeStage || "General";
 
   return (
     <main className="min-h-screen bg-[#F8FAFC]">
-      <AnalyticsDashboard lifeStage={userStage} />
+      <AnalyticsDashboard lifeStage={userStage} data={data} />
     </main>
   );
 }

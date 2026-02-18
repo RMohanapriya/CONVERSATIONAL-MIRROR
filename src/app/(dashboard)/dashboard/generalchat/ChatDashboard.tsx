@@ -12,25 +12,21 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { getAiResponse } from "@/actions/chat";
-
-interface Message {
-  role: "user" | "ai";
-  content: string;
-  suggestion?: string;
-}
+import { normalizeLifeStageForAI } from "@/lib/utils";
+import type { ChatMessage } from "../../../../../types";
 
 export function ChatDashboard({ lifeStage }: { lifeStage: string }) {
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "ai",
-      content: `Hello! I'm your Mirror. Calibrated for ${lifeStage}. What's on your mind?`,
+      content: `Hello! I'm your Mirror. Calibrated for ${lifeStage}. Type "past", "future", or "now" to begin.`,
     },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -45,12 +41,9 @@ export function ChatDashboard({ lifeStage }: { lifeStage: string }) {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
-
     el.style.height = "auto";
     const maxHeight = 96;
     el.style.height = Math.min(el.scrollHeight, maxHeight) + "px";
@@ -62,25 +55,21 @@ export function ChatDashboard({ lifeStage }: { lifeStage: string }) {
 
     const userMsg = input.trim();
     setInput("");
-
     setMessages((prev) => [...prev, { role: "user", content: userMsg }]);
     setIsLoading(true);
 
     try {
       const response = await getAiResponse({
         message: userMsg,
-        scenarioId: "General Chat",
-        lifeStage:
-          lifeStage === "school" || lifeStage === "college"
-            ? lifeStage
-            : "adult",
+        scenarioId: "general-chat",
+        lifeStage: normalizeLifeStageForAI(lifeStage),
       });
 
       setMessages((prev) => [
         ...prev,
         {
           role: "ai",
-          content: response.summary || "",
+          content: response.summary || response.inquiry || "",
           suggestion: response.suggestion || "",
         },
       ]);
@@ -99,7 +88,7 @@ export function ChatDashboard({ lifeStage }: { lifeStage: string }) {
 
   return (
     <div className="flex flex-col h-full bg-[#F8FAFC]">
-      {/* --- ANALYTICS-STYLE NAVBAR --- */}
+      {/* NAVBAR */}
       <nav className="sticky top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 h-16 flex items-center justify-between">
         <Link
           href="/dashboard"
@@ -119,7 +108,7 @@ export function ChatDashboard({ lifeStage }: { lifeStage: string }) {
         </div>
       </nav>
 
-      {/* --- MESSAGES --- */}
+      {/* MESSAGES */}
       <main className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar">
         <div className="max-w-4xl mx-auto space-y-6">
           <AnimatePresence initial={false}>
@@ -153,7 +142,7 @@ export function ChatDashboard({ lifeStage }: { lifeStage: string }) {
 
                   <div className="flex flex-col gap-2">
                     <div
-                      className={`p-5 rounded-[2.2rem] text-[16px] font-medium leading-relaxed border shadow-sm ${
+                      className={`px-6 py-4 rounded-[2.2rem] text-[15.5px] font-medium leading-[1.65] border shadow-sm ${
                         msg.role === "user"
                           ? "bg-indigo-600 text-white border-indigo-500 rounded-tr-none"
                           : "bg-white text-slate-800 border-slate-100 rounded-tl-none"
@@ -187,8 +176,8 @@ export function ChatDashboard({ lifeStage }: { lifeStage: string }) {
         </div>
       </main>
 
-      {/* --- INPUT --- */}
-      <footer className="sticky bottom-0 w-full py-4 px-4">
+      {/* INPUT */}
+      <footer className="sticky bottom-0 w-full py-4 px-4 bg-white border-t border-slate-100">
         <form
           onSubmit={handleSendMessage}
           className="max-w-4xl mx-auto flex items-center gap-3"
@@ -199,9 +188,9 @@ export function ChatDashboard({ lifeStage }: { lifeStage: string }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Talk to the mirror…"
+              placeholder='Type "past", "future", or "now" to begin...'
               rows={1}
-              className="flex-1 resize-none bg-transparent border-none px-4 py-2 text-[17px] font-medium leading-relaxed focus:outline-none overflow-y-auto transition-[height] duration-150 ease-out"
+              className="flex-1 resize-none bg-transparent border-none px-4 py-2 text-[17px] font-medium leading-relaxed focus:outline-none overflow-y-auto"
             />
             <Button
               type="submit"

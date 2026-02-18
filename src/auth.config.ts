@@ -1,33 +1,49 @@
 import type { NextAuthConfig } from "next-auth";
-import Credentials from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
-import clientPromise from "@/lib/mongodb";
 
+/**
+ * Edge-safe auth configuration.
+ * MUST NOT import bcryptjs, mongodb, or any Node.js-only modules.
+ * Used exclusively by middleware.ts which runs on Edge Runtime.
+ */
 export const authConfig: NextAuthConfig = {
-  providers: [
-    Credentials({
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
-        
-        const client = await clientPromise;
-        const db = client.db("mirrorDB");
-        const user = await db.collection("users").findOne({ email: credentials.email });
+  providers: [],
+  pages: {
+    signIn: "/login",
+  },
+  session: {
+    strategy: "jwt",
+  },
+  callbacks: {
+    authorized({ auth, request: { nextUrl } }) {
+      const isLoggedIn = !!auth?.user;
+      const isOnDashboard = nextUrl.pathname.startsWith("/dashboard");
+      const isOnAuth =
+        nextUrl.pathname.startsWith("/login") ||
+        nextUrl.pathname.startsWith("/register");
 
-        if (!user || !user.password) return null;
+      if (isOnDashboard && !isLoggedIn) {
+        return false; // Redirect to login
+      }
 
-        const isPasswordCorrect = await bcrypt.compare(
-          credentials.password as string,
-          user.password
-        );
+      if (isOnAuth && isLoggedIn) {
+        return Response.redirect(new URL("/dashboard", nextUrl));
+      }
 
-        if (isPasswordCorrect) {
-          return { id: user._id.toString(), name: user.name, email: user.email };
-        }
-        return null;
-      },
-    }),
-  ],
-  session: { strategy: "jwt" },
-  pages: { signIn: "/login" },
-  trustHost: true,
+      return true;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id as string;
+        token.lifeStage = (user as any).lifeStage as string;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+        (session.user as any).lifeStage = token.lifeStage as string;
+      }
+      return session;
+    },
+  },
 };

@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { getOverallAnalytics } from "@/actions/analytics";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import {
@@ -16,32 +14,17 @@ import {
   Flame,
   Info,
 } from "lucide-react";
+import type { getOverallAnalytics } from "@/actions/analytics";
 
-export function AnalyticsDashboard({ lifeStage }: { lifeStage: string }) {
-  const [data, setData] = useState<any>(null);
+type AnalyticsData = Awaited<ReturnType<typeof getOverallAnalytics>>;
 
-  useEffect(() => {
-    async function load() {
-      const result = await getOverallAnalytics();
-      setData(result);
-    }
-    load();
-  }, []);
-
-  if (!data)
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#F8FAFC]">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-          className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full mb-4"
-        />
-        <p className="font-black text-slate-400 uppercase tracking-widest text-[10px]">
-          Calibrating Progress Mirror...
-        </p>
-      </div>
-    );
-
+export function AnalyticsDashboard({
+  lifeStage,
+  data,
+}: {
+  lifeStage: string;
+  data: AnalyticsData;
+}) {
   const metrics = [
     {
       title: "Social Comfort",
@@ -71,7 +54,7 @@ export function AnalyticsDashboard({ lifeStage }: { lifeStage: string }) {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] pb-20">
-      {/* --- 1. STICKY NAVIGATION --- */}
+      {/* NAVBAR */}
       <nav className="sticky top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 h-16 flex items-center justify-between">
         <Link
           href="/dashboard"
@@ -99,7 +82,7 @@ export function AnalyticsDashboard({ lifeStage }: { lifeStage: string }) {
       </nav>
 
       <div className="max-w-5xl mx-auto px-6 space-y-10 mt-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        {/* --- 2. HEADER & STREAK --- */}
+        {/* HEADER & STREAK */}
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-[0.2em] border border-blue-100">
@@ -133,7 +116,7 @@ export function AnalyticsDashboard({ lifeStage }: { lifeStage: string }) {
           </motion.div>
         </div>
 
-        {/* --- 3. STRENGTH-BASED CARDS --- */}
+        {/* METRIC CARDS */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {metrics.map((m, i) => (
             <motion.div
@@ -143,9 +126,6 @@ export function AnalyticsDashboard({ lifeStage }: { lifeStage: string }) {
               transition={{ delay: i * 0.1 }}
             >
               <Card className="p-6 rounded-[2.5rem] border-none shadow-xl bg-white flex flex-col items-center group hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
-                {/* <div className="absolute top-4 right-4 text-slate-100 group-hover:text-slate-200 transition-colors">
-                  <TrendingUp size={40} />
-                </div> */}
                 <div className={`p-4 rounded-2xl mb-6 ${m.bg} ${m.col}`}>
                   <m.icon className="w-6 h-6" />
                 </div>
@@ -171,74 +151,6 @@ export function AnalyticsDashboard({ lifeStage }: { lifeStage: string }) {
             </motion.div>
           ))}
         </div>
-
-        {/* --- 4. MASTERED HISTORY --- */}
-        {/* <Card className="p-10 rounded-[3.5rem] bg-white border-none shadow-xl">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-2xl font-black text-slate-800 tracking-tight">
-              Mastered Scenarios
-            </h3>
-            <div className="px-4 py-2 bg-slate-50 rounded-2xl border border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              Private Reflection Log
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-slate-50">
-                  <th className="pb-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    Scenario
-                  </th>
-                  <th className="pb-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    Source
-                  </th>
-                  <th className="pb-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {data.history.length > 0 ? (
-                  data.history.map((s: any, i: number) => (
-                    <tr
-                      key={i}
-                      className="hover:bg-slate-50/50 transition-colors group"
-                    >
-                      <td className="py-6 font-bold text-slate-700">
-                        {s.scenarioId}
-                      </td>
-                      <td className="py-6">
-                        <span className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                          {s.isPractice ? (
-                            <Clock size={14} className="text-indigo-400" />
-                          ) : (
-                            <Globe size={14} className="text-emerald-400" />
-                          )}
-                          {s.isPractice ? "Practice Hub" : "Social Sandbox"}
-                        </span>
-                      </td>
-                      <td className="py-6 text-right">
-                        <div className="inline-flex items-center gap-2 text-emerald-600 font-bold text-[10px] uppercase tracking-widest px-3 py-1 bg-emerald-50 rounded-full border border-emerald-100">
-                          <CheckCircle2 size={14} /> Complete
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={3}
-                      className="py-12 text-center text-slate-400 font-medium italic"
-                    >
-                      No scenarios mastered yet. Your journey begins in the Hub.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </Card> */}
       </div>
     </div>
   );
