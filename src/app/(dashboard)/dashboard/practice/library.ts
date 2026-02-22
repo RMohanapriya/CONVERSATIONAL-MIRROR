@@ -45,9 +45,44 @@ export const PRACTICE_LIBRARY: PracticeLibrary = {
           "You see classmates laughing at a table with one empty chair; you want to join them.",
         research_goal: "Breaking into existing social clusters.",
       },
+      {
+        id: "c-s6",
+        title: "The Cancelled Plan",
+        context:
+          "A friend texts 'Hey, something came up tonight, can we reschedule?' thirty minutes before you were supposed to meet.",
+        research_goal: "Interpreting vague cancellations without over-reacting.",
+      },
+      {
+        id: "c-s7",
+        title: "Professor After Class",
+        context:
+          "You go to ask your professor a question after class. She is packing her bag and glancing at the door while you talk.",
+        research_goal: "Reading availability signals from authority figures.",
+      },
+      {
+        id: "c-s8",
+        title: "The Unsolicited Opinion",
+        context:
+          "You mention your major to a new acquaintance and they say 'Oh, that major is really hard to get a job in.'",
+        research_goal: "Responding to unsolicited negative opinions without conflict.",
+      },
+      {
+        id: "c-s9",
+        title: "Group Chat Silence",
+        context:
+          "You send a message in the group chat with a question for the team project. Two hours pass and nobody replies.",
+        research_goal: "Managing uncertainty from non-response in digital communication.",
+      },
+      {
+        id: "c-s10",
+        title: "Borrowed and Not Returned",
+        context:
+          "You lent a classmate your notes two weeks ago. You need them back but they have not mentioned it.",
+        research_goal: "Making a polite direct request without sounding accusatory.",
+      },
     ],
   },
-  // KEY FIXED: was "workplace", now "job" to match DB value
+
   job: {
     Social: [
       {
@@ -85,8 +120,44 @@ export const PRACTICE_LIBRARY: PracticeLibrary = {
           "A peer says 'That's a very... unique way to solve the problem.'",
         research_goal: "Decoding hedging or coded negative feedback.",
       },
+      {
+        id: "j-s6",
+        title: "The Meeting Interruption",
+        context:
+          "You are explaining your idea in a team meeting and your manager cuts in and starts talking over you.",
+        research_goal: "Responding to being interrupted without escalating tension.",
+      },
+      {
+        id: "j-s7",
+        title: "The Undeserved Credit",
+        context:
+          "In a meeting, a colleague presents your idea as their own and receives praise from the team.",
+        research_goal: "Asserting ownership of work professionally without aggression.",
+      },
+      {
+        id: "j-s8",
+        title: "Too Much Detail",
+        context:
+          "You are explaining a task to your manager and she says 'Got it, thanks' before you finish.",
+        research_goal: "Reading signals that the listener has enough information.",
+      },
+      {
+        id: "j-s9",
+        title: "The Unclear Deadline",
+        context:
+          "Your manager sends an email saying 'Can you finish the report soon?' but does not give a date.",
+        research_goal: "Asking for clarification on vague instructions without seeming difficult.",
+      },
+      {
+        id: "j-s10",
+        title: "After the Mistake",
+        context:
+          "You sent an email to the wrong client yesterday. Your manager has now called you into her office.",
+        research_goal: "Taking accountability professionally without over-apologising or deflecting.",
+      },
     ],
   },
+
   school: {
     Social: [
       {
@@ -123,6 +194,41 @@ export const PRACTICE_LIBRARY: PracticeLibrary = {
         context:
           "The teacher says 'I'm waiting...' while standing with arms crossed at the front of the room.",
         research_goal: "Interpreting non-verbal authority cues.",
+      },
+      {
+        id: "s-s6",
+        title: "The Accidental Spoiler",
+        context:
+          "You tell a friend the ending of a book the class is reading because you finished it early. They look upset.",
+        research_goal: "Recognising when sharing information can upset others.",
+      },
+      {
+        id: "s-s7",
+        title: "Partner Pick",
+        context:
+          "The teacher says 'Find a partner.' Everyone around you quickly pairs up and you are left standing alone.",
+        research_goal: "Asking to join a pair or group without feeling rejected.",
+      },
+      {
+        id: "s-s8",
+        title: "The Wrong Answer",
+        context:
+          "You answer a question in class confidently. The teacher says 'Interesting... does anyone else have a thought?'",
+        research_goal: "Understanding indirect correction from a teacher.",
+      },
+      {
+        id: "s-s9",
+        title: "Lunchtime Topic",
+        context:
+          "You are talking about your favourite video game at lunch. A friend says 'Yeah, cool' and looks at their food.",
+        research_goal: "Noticing when the listener is losing interest in a conversation.",
+      },
+      {
+        id: "s-s10",
+        title: "The Apology",
+        context:
+          "You accidentally knocked a classmate's water bottle off their desk and it spilled everywhere.",
+        research_goal: "Apologising clearly and taking simple responsibility.",
       },
     ],
   },

@@ -15,6 +15,7 @@ import {
   Info,
 } from "lucide-react";
 import type { getOverallAnalytics } from "@/actions/analytics";
+import ProgressChart from "./ProgressChart"; // ✅ NEW IMPORT
 
 type AnalyticsData = Awaited<ReturnType<typeof getOverallAnalytics>>;
 
@@ -32,15 +33,15 @@ export function AnalyticsDashboard({
       icon: Smile,
       col: "text-emerald-600",
       bg: "bg-emerald-50",
-      desc: "Ease in navigating conversations",
+      desc: "Sessions fully completed",
     },
     {
       title: "Interaction Maturity",
-      val: `+${data.interactionMaturity}`,
+      val: data.interactionMaturity,
       icon: Compass,
       col: "text-indigo-600",
       bg: "bg-indigo-50",
-      desc: "Adaptive social responses",
+      desc: "Avg turns per scenario",
     },
     {
       title: "Perspective Insight",
@@ -48,7 +49,7 @@ export function AnalyticsDashboard({
       icon: Zap,
       col: "text-blue-600",
       bg: "bg-blue-50",
-      desc: "Understanding unspoken cues",
+      desc: "Past reflections engaged",
     },
   ];
 
@@ -110,7 +111,7 @@ export function AnalyticsDashboard({
                 Social Streak
               </p>
               <p className="text-2xl font-black text-orange-600">
-                {data.streak} Days Consistent
+                {data.streak} {data.streak === 1 ? "Day" : "Days"} Consistent
               </p>
             </div>
           </motion.div>
@@ -120,7 +121,7 @@ export function AnalyticsDashboard({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {metrics.map((m, i) => (
             <motion.div
-              key={i}
+              key={m.title}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
@@ -144,13 +145,23 @@ export function AnalyticsDashboard({
                 <div className="mt-8 pt-6 border-t border-slate-50 w-full flex items-center justify-center gap-2">
                   <Info className="w-3 h-3 text-slate-300" />
                   <span className="text-[13px] text-center font-black text-slate-400 tracking-widest italic">
-                    Based on {data.totalScenarios} sessions
+                    {data.totalChatSessions ?? 0} reflections ·{" "}
+                    {data.totalPracticeSessions ?? 0} practice sessions
                   </span>
                 </div>
               </Card>
             </motion.div>
           ))}
         </div>
+
+        {/* ✅ PROGRESS CHART — Practice Pulse */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <ProgressChart data={data.practiceSessions ?? []} />
+        </motion.div>
       </div>
     </div>
   );

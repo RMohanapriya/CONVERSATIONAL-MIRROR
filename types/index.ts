@@ -32,4 +32,5 @@ export interface ChatMessage {
   role: "user" | "ai";
   content: string;
   suggestion?: string;
+  inquiry?: string;   // ← added: holds the follow-up question separately
 }

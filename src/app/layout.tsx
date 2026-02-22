@@ -17,7 +17,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "Mirror AI | Social Metacognition Platform",
+  title: "Conversational Mirror | Social Metacognition Platform",
   description:
     "A non-judgmental space for neurodivergent social practice and reflection.",
 };

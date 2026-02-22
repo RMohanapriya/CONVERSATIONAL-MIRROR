@@ -20,7 +20,7 @@ export function ChatDashboard({ lifeStage }: { lifeStage: string }) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "ai",
-      content: `Hello! I'm your Mirror. Calibrated for ${lifeStage}. Type "past", "future", or "now" to begin.`,
+      content: `Hello! I'm your Mirror. Calibrated for ${lifeStage}. Type "past" or "future" to begin.`,
     },
   ]);
   const [input, setInput] = useState("");
@@ -65,12 +65,14 @@ export function ChatDashboard({ lifeStage }: { lifeStage: string }) {
         lifeStage: normalizeLifeStageForAI(lifeStage),
       });
 
+      // Only summary goes in the main bubble — suggestion and inquiry are separate
       setMessages((prev) => [
         ...prev,
         {
           role: "ai",
-          content: response.summary || response.inquiry || "",
+          content: response.summary || "",
           suggestion: response.suggestion || "",
+          inquiry: response.inquiry || "",
         },
       ]);
     } catch {
@@ -141,22 +143,33 @@ export function ChatDashboard({ lifeStage }: { lifeStage: string }) {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <div
-                      className={`px-6 py-4 rounded-[2.2rem] text-[15.5px] font-medium leading-[1.65] border shadow-sm ${
-                        msg.role === "user"
-                          ? "bg-indigo-600 text-white border-indigo-500 rounded-tr-none"
-                          : "bg-white text-slate-800 border-slate-100 rounded-tl-none"
-                      }`}
-                    >
-                      {msg.content}
-                    </div>
+                    {/* 1. Main reflection / summary bubble */}
+                    {msg.content && (
+                      <div
+                        className={`px-6 py-4 rounded-[2.2rem] text-[15.5px] font-medium leading-[1.65] border shadow-sm whitespace-pre-wrap ${
+                          msg.role === "user"
+                            ? "bg-indigo-600 text-white border-indigo-500 rounded-tr-none"
+                            : "bg-white text-slate-800 border-slate-100 rounded-tl-none"
+                        }`}
+                      >
+                        {msg.content}
+                      </div>
+                    )}
 
+                    {/* 2. Suggestion card — shown BEFORE the follow-up question */}
                     {msg.role === "ai" && msg.suggestion && (
-                      <div className="mt-2 p-4 bg-indigo-50 border border-indigo-100 rounded-2xl text-sm text-indigo-900 max-w-sm">
+                      <div className="mt-1 p-4 bg-indigo-50 border border-indigo-100 rounded-2xl text-sm text-indigo-900">
                         <strong className="block mb-1 text-indigo-600 uppercase text-[10px] tracking-widest">
                           Mirror Suggestion
                         </strong>
                         {msg.suggestion}
+                      </div>
+                    )}
+
+                    {/* 3. Follow-up question — always shown last */}
+                    {msg.role === "ai" && msg.inquiry && (
+                      <div className="px-6 py-4 rounded-[2.2rem] rounded-tl-none text-[15.5px] font-medium leading-[1.65] border shadow-sm bg-white text-slate-800 border-slate-100">
+                        {msg.inquiry}
                       </div>
                     )}
                   </div>
@@ -188,7 +201,7 @@ export function ChatDashboard({ lifeStage }: { lifeStage: string }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder='Type "past", "future", or "now" to begin...'
+              placeholder='Type here...'
               rows={1}
               className="flex-1 resize-none bg-transparent border-none px-4 py-2 text-[17px] font-medium leading-relaxed focus:outline-none overflow-y-auto"
             />

@@ -19,15 +19,18 @@ export function PracticeDashboard({
   scenarioId,
   scenarioTitle,
   scenarioContext,
+  lifeStage,
 }: {
   scenarioId: string;
   scenarioTitle: string;
   scenarioContext: string;
+  lifeStage: string;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [hasSucceeded, setHasSucceeded] = useState(false);
+  const [lastSuggestion, setLastSuggestion] = useState(""); // ✅ track last suggestion
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,9 +50,14 @@ export function PracticeDashboard({
       const response: PracticeResponse = await getPracticeResponse({
         userMessage: userMsg,
         scenarioContext,
+        scenarioId,
+        lifeStage,
+        lastSuggestion, // ✅ pass for copy-paste detection
       });
 
       if (response.isSuccessful) setHasSucceeded(true);
+
+      setLastSuggestion(response.suggestion || ""); // ✅ update for next turn
 
       setMessages((prev) => [
         ...prev,
@@ -60,13 +68,13 @@ export function PracticeDashboard({
         },
       ]);
     } catch (error) {
-      console.error("Practice Coach Error:", error);
+      console.error("Practice Error:", error);
       setMessages((prev) => [
         ...prev,
         {
           role: "ai",
           content:
-            "The coach encountered an error. Please try your response again.",
+            "Mirror encountered an error. Please try your response again.",
         },
       ]);
     } finally {
@@ -78,6 +86,7 @@ export function PracticeDashboard({
     setMessages([]);
     setHasSucceeded(false);
     setInput("");
+    setLastSuggestion(""); // ✅ reset on restart
   };
 
   return (
