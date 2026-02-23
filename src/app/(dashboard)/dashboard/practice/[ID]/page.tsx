@@ -33,6 +33,7 @@ export default async function ScenarioSessionPage({ params }: PageProps) {
         scenarioId={scenario.id}
         scenarioTitle={scenario.title}
         scenarioContext={scenario.context}
+        lifeStage={rawStage}
       />
     </div>
   );

@@ -47,10 +47,6 @@ MIRROR PRINCIPLES:
 - Do not generalize. Do not assume. Only work with what the user shared.
 `;
 
-/* ==========================================================================
-   AI HELPERS
-   ========================================================================== */
-
 async function generateQuestion(
   groq: Groq,
   scenarioType: "PAST" | "FUTURE",
@@ -119,28 +115,16 @@ Write a short, warm reflection that builds genuine metacognitive awareness.
 Cover all four of these in order, in plain language:
 
 1. INTERNAL STATE: What the user was thinking or assuming in that moment.
-   What belief or feeling was already active before they responded?
-   Use their exact situation — never vague phrases.
-   Example: "When your supervisor pointed out the error, your first instinct was to protect your position."
-
 2. TRIGGER: What specifically caused their reaction.
-   What was the moment that set things in motion?
-   Example: "As soon as he named the error, you were already forming a response."
-
-3. OTHER PERSON'S EXPERIENCE: What the other person might have experienced — briefly, without assuming too much.
-   Example: "He may have experienced your response as pushback rather than explanation."
-
+3. OTHER PERSON'S EXPERIENCE: What the other person might have experienced.
 4. INTENT vs IMPACT GAP: The difference between what the user meant to do and what actually happened.
-   Name it gently — not as a flaw, just as something real.
-   Example: "You wanted to be heard, but the conversation became tense instead."
 
 CRITICAL RULES:
-- NEVER mirror the user's words back verbatim. Always reframe in clearer terms.
-- NEVER use vague phrases like "you were trying to do something" or "something happened".
-- ALWAYS name the specific situation directly using the user's own details.
+- NEVER mirror the user's words back verbatim.
+- NEVER use vague phrases.
+- ALWAYS name the specific situation directly.
 - No assumptions beyond what the user shared.
 - Do not say what they "should" have done.
-- Avoid: "wrong", "mistake", "error", "problem", "difficulty", "struggle".
 - Do not end with advice or a question.
 - 4–5 sentences maximum.
 
@@ -180,8 +164,6 @@ Write ONE short, warm yes/no question asking if the user would like
 some concrete ideas for handling a similar situation next time.
 - Must be answerable with yes or no.
 - One sentence only. Warm, not pushy.
-- Do not ask multiple things.
-- Example: "Would you like some ideas for next time?"
 
 OUTPUT JSON ONLY:
 { "inquiry": "<your single yes/no question here>" }
@@ -217,13 +199,6 @@ WHAT THE USER WANTED: "${userIntent}"
 TASK:
 Offer 1–2 concrete possibilities the user could consider next time.
 Frame them as options, not instructions.
-
-Rules:
-- Use phrasing like "Some people find it helps to...", "One thing worth considering is...", "You might try..."
-- Each possibility must relate directly to THIS specific situation.
-- Focus on observable, concrete actions (pausing, waiting, signaling, asking).
-- Never say "you should", "you must", "you need to".
-- No general life advice. No labels.
 - 2–4 sentences maximum.
 
 OUTPUT JSON ONLY:
@@ -257,8 +232,6 @@ SITUATION: "${scenarioContext}"
 
 TASK:
 Write ONE short, warm yes/no question asking if the user wants to reflect on anything else.
-- Low pressure. Open. One sentence only.
-- Must be answerable with yes or no.
 
 OUTPUT JSON ONLY:
 { "inquiry": "<your question here>" }
@@ -271,7 +244,6 @@ OUTPUT JSON ONLY:
   return parsed.inquiry || "Is there anything else you'd like to reflect on?";
 }
 
-// ── FUTURE: ask if the user wants preparation help ──────────────────────────
 async function generateAskHelpQuestion(
   groq: Groq,
   scenarioContext: string,
@@ -293,9 +265,6 @@ UPCOMING SITUATION: "${scenarioContext}"
 TASK:
 Write ONE short, warm yes/no question asking if the user would like help
 thinking through how to handle this situation.
-- One sentence only. Low pressure. Inviting, not pushy.
-- Must be answerable with yes or no.
-- Example: "Would you like help thinking through how to handle it?"
 
 OUTPUT JSON ONLY:
 { "inquiry": "<your question here>" }
@@ -305,12 +274,9 @@ OUTPUT JSON ONLY:
   });
 
   const parsed = safeParseAIResponse(completion.choices[0].message.content);
-  return (
-    parsed.inquiry || "Would you like help thinking through how to handle it?"
-  );
+  return parsed.inquiry || "Would you like help thinking through how to handle it?";
 }
 
-// ── FUTURE: full preparation with scenarios + hidden rules ───────────────────
 async function generateFutureScenariosAndPrep(
   groq: Groq,
   scenarioContext: string,
@@ -329,38 +295,42 @@ ${MIRROR_CORE}
 
 LIFE STAGE: ${lifeStage}
 UPCOMING SITUATION: "${scenarioContext}"
-WHAT THE USER WANTS: "${userGoal}"
+WHAT THE USER HOPES TO GET FROM IT: "${userGoal}"
 
 TASK:
-Produce a warm, grounded response in two parts:
+Produce a warm, grounded response in two parts.
 
 PART 1 — summary:
-Reflect the situation back clearly and acknowledge what the user wants.
-- Name the situation in their own terms.
-- Acknowledge their goal without judgment.
-- Briefly name what might feel uncertain or challenging — not as a flaw, just as something real.
-- 2–3 sentences. No advice in this part.
+Reflect the SITUATION back clearly. Acknowledge the user's goal (what they hope to get).
+Name what might feel uncertain — not as a flaw, just as something real.
+2–3 sentences. No advice yet.
+- Do NOT validate emotions with phrases like "it's okay to feel that way", "that's understandable", or "it's normal to feel...".
+- Just name the situation and the uncertainty plainly.
 
-PART 2 — suggestion:
-Help the user face this situation with confidence. Cover all three areas:
+PART 2 — suggestion (THREE separate fields):
 
-1. POSSIBLE SCENARIOS: What could realistically happen. Name 2–3 specific possibilities.
-2. CONCRETE ACTIONS: What the user can do for each scenario.
-   - Use "You could...", "It may help to...", "If X happens, you might..."
-   - Focus on observable actions: what to say, when to pause, how to signal, what to watch for.
-3. HIDDEN RULES: The unwritten expectations most people follow in this type of situation
-   that are rarely explained out loud.
-   - Name them plainly: "In situations like this, people usually expect...",
-     "It's common for others to assume...", "One thing that often goes unspoken is..."
-   - Be direct and specific — do not hint. Spell it out.
+"scenarios": 2–3 short sentences. What could realistically happen in THIS situation.
+- Base on the situation, not the goal. Each sentence = one scenario.
+- Max 3 sentences.
 
-Rules for PART 2:
-- Plain, direct language. No jargon. No clinical terms.
-- Never say "you should", "you must", "you need to".
-- 5–8 sentences maximum.
+"actions": 2–3 short sentences. One concrete option per scenario from above.
+- Use "you could", "one option is", "it may help to".
+- NEVER use "you should", "you must", "you need to", "you have to".
+- Max 3 sentences.
+
+"hidden_rules": 2–3 short sentences. Unwritten expectations in this type of situation.
+- Be direct. Spell it out. No hinting.
+- Use "most people...", "a common expectation is...", "people in this situation usually...".
+- NEVER use "you should", "you must".
+- End on the last rule — no motivational closing sentence.
+- Max 3 sentences.
+
+GLOBAL RULES:
+- Each sentence must add new information. No repetition.
+- Never confuse the situation with the goal.
 
 OUTPUT JSON ONLY:
-{ "summary": "<part 1 here>", "inquiry": "", "suggestion": "<part 2 here>" }
+{ "summary": "<part 1>", "inquiry": "", "suggestion": "", "scenarios": "<scenarios>", "actions": "<actions>", "hidden_rules": "<hidden_rules>" }
 `,
       },
     ],
@@ -369,7 +339,6 @@ OUTPUT JSON ONLY:
   return safeParseAIResponse(completion.choices[0].message.content);
 }
 
-// ── FUTURE: simple warm motivation when user declines help ───────────────────
 async function generateFutureMotivation(
   groq: Groq,
   scenarioContext: string,
@@ -391,12 +360,7 @@ UPCOMING SITUATION: "${scenarioContext}"
 WHAT THE USER WANTS: "${userGoal}"
 
 TASK:
-Write a short, warm, encouraging message for someone who already feels
-ready to face this situation on their own.
-- Acknowledge what they want from the situation.
-- Affirm that they've already taken a good step by thinking it through.
-- No advice. No scenarios. No suggestions. Just genuine warmth.
-- 2–3 sentences maximum.
+Write a short, warm, encouraging message. No advice. 2–3 sentences maximum.
 
 OUTPUT JSON ONLY:
 { "summary": "<motivation here>" }
@@ -406,10 +370,7 @@ OUTPUT JSON ONLY:
   });
 
   const parsed = safeParseAIResponse(completion.choices[0].message.content);
-  return (
-    parsed.summary ||
-    "You've already thought this through, and that matters. Trust what you know about what you want from this."
-  );
+  return parsed.summary || "You've already thought this through, and that matters.";
 }
 
 async function generateFutureFollowUp(
@@ -432,9 +393,7 @@ SITUATION: "${scenarioContext}"
 
 TASK:
 Write ONE short, warm yes/no question asking if there is anything else
-the user wants to think through about this situation.
-- Low pressure. Open. One sentence only.
-- Must be answerable with yes or no.
+the user wants to think through.
 
 OUTPUT JSON ONLY:
 { "inquiry": "<your question here>" }
@@ -447,9 +406,6 @@ OUTPUT JSON ONLY:
   return parsed.inquiry || "Is there anything else you'd like to think through?";
 }
 
-/* ==========================================================================
-   HELPER — resolve AWAIT_SCENARIO turn from any child turn
-   ========================================================================== */
 async function resolveScenarioTurn(
   db: Db,
   userId: string,
@@ -458,9 +414,7 @@ async function resolveScenarioTurn(
 ) {
   const parentId = toObjectId(parentTurnId);
   if (parentId) {
-    const turn = await db
-      .collection("chat_history")
-      .findOne({ _id: parentId });
+    const turn = await db.collection("chat_history").findOne({ _id: parentId });
     if (turn) return turn;
   }
   return db.collection("chat_history").findOne(
@@ -470,9 +424,86 @@ async function resolveScenarioTurn(
 }
 
 /* ==========================================================================
+   RESET ACTION — clears DB state so next session starts fresh
+   ========================================================================== */
+export async function resetChatSession({
+  scenarioId,
+}: {
+  scenarioId?: string;
+}): Promise<void> {
+  const session = await auth();
+  if (!session?.user) throw new Error("User must be authenticated.");
+
+  const client = await clientPromise;
+  const db: Db = client.db("mirrorDB");
+  const userId = session.user.id ?? session.user.email ?? "unknown";
+  const resolvedScenarioId = scenarioId ?? "general";
+
+  // Mark all existing turns for this user+scenario as CLOSED
+  await db.collection("chat_history").updateMany(
+    { userId, scenarioId: resolvedScenarioId },
+    { $set: { stage: "CLOSED" } },
+  );
+}
+
+/* ==========================================================================
+   MODE SELECTION ACTION — saves past/future choice to DB
+   (called by frontend when user taps Past or Future button)
+   ========================================================================== */
+export async function saveModeSelection({
+  mode,
+  scenarioId,
+}: {
+  mode: "past" | "future";
+  scenarioId?: string;
+}): Promise<void> {
+  const session = await auth();
+  if (!session?.user) throw new Error("User must be authenticated.");
+
+  const client = await clientPromise;
+  const db: Db = client.db("mirrorDB");
+  const userId = session.user.id ?? session.user.email ?? "unknown";
+  const resolvedScenarioId = scenarioId ?? "general";
+  const scenarioType = mode.toUpperCase() as "PAST" | "FUTURE";
+
+  const modeLabels: Record<string, string> = {
+    PAST: "Okay. Describe the situation you'd like to reflect on.",
+    FUTURE: "Okay. Describe the situation you're thinking about.",
+  };
+
+  // Check the latest turn — if it's already AWAIT_SCENARIO just update it
+  // (happens when FOLLOW_UP→YES already created an AWAIT_SCENARIO turn)
+  const lastTurn = await db
+    .collection("chat_history")
+    .findOne(
+      { userId, scenarioId: resolvedScenarioId },
+      { sort: { timestamp: -1 } },
+    );
+
+  if (lastTurn?.stage === "AWAIT_SCENARIO") {
+    // Just update the scenarioType in case mode changed
+    await db.collection("chat_history").updateOne(
+      { _id: lastTurn._id },
+      { $set: { scenarioType, userMessage: mode, timestamp: new Date() } },
+    );
+  } else {
+    // Fresh insert
+    await db.collection("chat_history").insertOne({
+      userId,
+      scenarioId: resolvedScenarioId,
+      userMessage: mode,
+      aiResponse: { summary: modeLabels[scenarioType], inquiry: "", suggestion: "" },
+      stage: "AWAIT_SCENARIO",
+      scenarioType,
+      parentTurnId: null,
+      timestamp: new Date(),
+    });
+  }
+}
+
+/* ==========================================================================
    MAIN ACTION
    ========================================================================== */
-
 export async function getAiResponse({
   message,
   scenarioId,
@@ -520,7 +551,7 @@ export async function getAiResponse({
     return closure;
   }
 
-  /* ---------- MODE SELECTION (only when idle) ---------- */
+  /* ---------- MODE SELECTION — still supported if typed directly ---------- */
   const isIdle =
     !currentStage ||
     currentStage === "CLOSED" ||
@@ -554,385 +585,158 @@ export async function getAiResponse({
   /* ---------- AWAIT_SCENARIO → ONE CLARIFYING QUESTION ---------- */
   if (currentStage === "AWAIT_SCENARIO") {
     const scenarioType = lastTurn!.scenarioType as "PAST" | "FUTURE";
-    const inquiry = await generateQuestion(
-      groq,
-      scenarioType,
-      original,
-      lifeStage,
-    );
-
+    const inquiry = await generateQuestion(groq, scenarioType, original, lifeStage);
     const question: AIResponse = { summary: "", inquiry, suggestion: "" };
 
     await saveTurn(
-      db,
-      userId,
-      resolvedScenarioId,
-      original,
-      question,
-      "QUESTION",
-      scenarioType,
-      lastTurn!._id,
+      db, userId, resolvedScenarioId, original, question,
+      "QUESTION", scenarioType, lastTurn!._id,
     );
     return question;
   }
 
   /* ---------- QUESTION → REFLECTION (PAST) or ASK_HELP (FUTURE) ---------- */
   if (currentStage === "QUESTION") {
-    const scenarioType = lastTurn!.scenarioType as "PAST" | "FUTURE";
+    const scenarioType = (lastTurn!.scenarioType ?? "PAST") as "PAST" | "FUTURE";
+    if (!lastTurn!.scenarioType) {
+      // Corrupted turn — reset and bail
+      await db.collection("chat_history").updateMany(
+        { userId, scenarioId: resolvedScenarioId },
+        { $set: { stage: "CLOSED" } },
+      );
+      return { summary: "Let's start fresh. Choose Past or Future to begin.", inquiry: "", suggestion: "" };
+    }
     const awaitScenarioTurn = await resolveScenarioTurn(
-      db,
-      userId,
-      resolvedScenarioId,
-      lastTurn!.parentTurnId,
+      db, userId, resolvedScenarioId, lastTurn!.parentTurnId,
     );
     const scenarioContext = awaitScenarioTurn?.userMessage ?? "";
 
-    /* ── PAST: generate metacognitive reflection ── */
     if (scenarioType === "PAST") {
-      const reflectionText = await generatePastReflection(
-        groq,
-        scenarioContext,
-        original,
-        lifeStage,
-      );
-
-      const askInquiry = await generateAskSuggestion(
-        groq,
-        scenarioContext,
-        reflectionText,
-        lifeStage,
-      );
-
-      const reflection: AIResponse = {
-        summary: reflectionText,
-        inquiry: askInquiry,
-        suggestion: "",
-      };
+      const reflectionText = await generatePastReflection(groq, scenarioContext, original, lifeStage);
+      const askInquiry = await generateAskSuggestion(groq, scenarioContext, reflectionText, lifeStage);
+      const reflection: AIResponse = { summary: reflectionText, inquiry: askInquiry, suggestion: "" };
 
       await saveTurn(
-        db,
-        userId,
-        resolvedScenarioId,
-        original,
-        reflection,
-        "ASK_SUGGESTION",
-        "PAST",
-        awaitScenarioTurn?._id,
+        db, userId, resolvedScenarioId, original, reflection,
+        "ASK_SUGGESTION", "PAST", awaitScenarioTurn?._id,
       );
       return reflection;
     }
 
-    /* ── FUTURE: ask if user wants help (YES/NO branch) ── */
     if (scenarioType === "FUTURE") {
-      const askHelpInquiry = await generateAskHelpQuestion(
-        groq,
-        scenarioContext,
-        lifeStage,
-      );
-
-      const askHelp: AIResponse = {
-        summary: "",
-        inquiry: askHelpInquiry,
-        suggestion: "",
-      };
+      const askHelpInquiry = await generateAskHelpQuestion(groq, scenarioContext, lifeStage);
+      const askHelp: AIResponse = { summary: "", inquiry: askHelpInquiry, suggestion: "" };
 
       await saveTurn(
-        db,
-        userId,
-        resolvedScenarioId,
-        original,
-        askHelp,
-        "ASK_HELP",
-        "FUTURE",
-        awaitScenarioTurn?._id,
+        db, userId, resolvedScenarioId, original, askHelp,
+        "ASK_HELP", "FUTURE", awaitScenarioTurn?._id,
       );
       return askHelp;
     }
   }
 
-  /* ---------- PAST: ASK_SUGGESTION → YES → give suggestion ---------- */
+  /* ---------- PAST: ASK_SUGGESTION → YES ---------- */
   if (currentStage === "ASK_SUGGESTION" && YES_REGEX.test(trimmed)) {
     const questionTurn = await db.collection("chat_history").findOne(
       { userId, scenarioId: resolvedScenarioId, stage: "QUESTION" },
       { sort: { timestamp: -1 } },
     );
-
     const awaitScenarioTurn = await resolveScenarioTurn(
-      db,
-      userId,
-      resolvedScenarioId,
-      questionTurn?.parentTurnId,
+      db, userId, resolvedScenarioId, questionTurn?.parentTurnId,
     );
-
     const scenarioContext = awaitScenarioTurn?.userMessage ?? "";
     const userIntent = questionTurn?.userMessage ?? "";
 
-    const suggestionText = await generatePastSuggestion(
-      groq,
-      scenarioContext,
-      userIntent,
-      lifeStage,
-    );
+    const suggestionText = await generatePastSuggestion(groq, scenarioContext, userIntent, lifeStage);
+    const followUpInquiry = await generatePastFollowUp(groq, scenarioContext, lifeStage);
+    const suggestion: AIResponse = { summary: "", inquiry: followUpInquiry, suggestion: suggestionText };
 
-    const followUpInquiry = await generatePastFollowUp(
-      groq,
-      scenarioContext,
-      lifeStage,
-    );
-
-    const suggestion: AIResponse = {
-      summary: "",
-      inquiry: followUpInquiry,
-      suggestion: suggestionText,
-    };
-
-    await saveTurn(
-      db,
-      userId,
-      resolvedScenarioId,
-      original,
-      suggestion,
-      "FOLLOW_UP",
-      "PAST",
-    );
+    await saveTurn(db, userId, resolvedScenarioId, original, suggestion, "FOLLOW_UP", "PAST");
     return suggestion;
   }
 
-  /* ---------- PAST: ASK_SUGGESTION → NO → skip to follow-up ---------- */
-  if (currentStage === "ASK_SUGGESTION" && NO_REGEX.test(trimmed)) {
-    const awaitScenarioTurn = await db.collection("chat_history").findOne(
-      { userId, scenarioId: resolvedScenarioId, stage: "AWAIT_SCENARIO" },
-      { sort: { timestamp: -1 } },
-    );
-
-    const scenarioContext = awaitScenarioTurn?.userMessage ?? "";
-    const followUpInquiry = await generatePastFollowUp(
-      groq,
-      scenarioContext,
-      lifeStage,
-    );
-
-    const response: AIResponse = {
-      summary: "",
-      inquiry: followUpInquiry,
-      suggestion: "",
-    };
-
-    await saveTurn(
-      db,
-      userId,
-      resolvedScenarioId,
-      original,
-      response,
-      "FOLLOW_UP",
-      "PAST",
-    );
-    return response;
-  }
-
-  /* ---------- PAST: ASK_SUGGESTION → UNRECOGNIZED → treat as NO ---------- */
+  /* ---------- PAST: ASK_SUGGESTION → NO or UNRECOGNIZED ---------- */
   if (currentStage === "ASK_SUGGESTION") {
     const awaitScenarioTurn = await db.collection("chat_history").findOne(
       { userId, scenarioId: resolvedScenarioId, stage: "AWAIT_SCENARIO" },
       { sort: { timestamp: -1 } },
     );
-
     const scenarioContext = awaitScenarioTurn?.userMessage ?? "";
-    const followUpInquiry = await generatePastFollowUp(
-      groq,
-      scenarioContext,
-      lifeStage,
-    );
+    const followUpInquiry = await generatePastFollowUp(groq, scenarioContext, lifeStage);
+    const response: AIResponse = { summary: "", inquiry: followUpInquiry, suggestion: "" };
 
-    const response: AIResponse = {
-      summary: "",
-      inquiry: followUpInquiry,
-      suggestion: "",
-    };
-
-    await saveTurn(
-      db,
-      userId,
-      resolvedScenarioId,
-      original,
-      response,
-      "FOLLOW_UP",
-      "PAST",
-    );
+    await saveTurn(db, userId, resolvedScenarioId, original, response, "FOLLOW_UP", "PAST");
     return response;
   }
 
-  /* ---------- FUTURE: ASK_HELP → YES → full prep + hidden rules ---------- */
+  /* ---------- FUTURE: ASK_HELP → YES ---------- */
   if (currentStage === "ASK_HELP" && YES_REGEX.test(trimmed)) {
     const awaitScenarioTurn = await resolveScenarioTurn(
-      db,
-      userId,
-      resolvedScenarioId,
-      lastTurn!.parentTurnId,
+      db, userId, resolvedScenarioId, lastTurn!.parentTurnId,
     );
-
     const questionTurn = await db.collection("chat_history").findOne(
       { userId, scenarioId: resolvedScenarioId, stage: "QUESTION" },
       { sort: { timestamp: -1 } },
     );
-
     const scenarioContext = awaitScenarioTurn?.userMessage ?? "";
     const userGoal = questionTurn?.userMessage ?? "";
 
-    const futureResponse = await generateFutureScenariosAndPrep(
-      groq,
-      scenarioContext,
-      userGoal,
-      lifeStage,
-    );
-
-    futureResponse.inquiry = await generateFutureFollowUp(
-      groq,
-      scenarioContext,
-      lifeStage,
-    );
+    const futureResponse = await generateFutureScenariosAndPrep(groq, scenarioContext, userGoal, lifeStage);
+    futureResponse.inquiry = await generateFutureFollowUp(groq, scenarioContext, lifeStage);
 
     await saveTurn(
-      db,
-      userId,
-      resolvedScenarioId,
-      original,
-      futureResponse,
-      "FOLLOW_UP",
-      "FUTURE",
-      awaitScenarioTurn?._id,
+      db, userId, resolvedScenarioId, original, futureResponse,
+      "FOLLOW_UP", "FUTURE", awaitScenarioTurn?._id,
     );
     return futureResponse;
   }
 
-  /* ---------- FUTURE: ASK_HELP → NO → simple motivation + follow-up ---------- */
-  if (currentStage === "ASK_HELP" && NO_REGEX.test(trimmed)) {
-    const awaitScenarioTurn = await resolveScenarioTurn(
-      db,
-      userId,
-      resolvedScenarioId,
-      lastTurn!.parentTurnId,
-    );
-
-    const questionTurn = await db.collection("chat_history").findOne(
-      { userId, scenarioId: resolvedScenarioId, stage: "QUESTION" },
-      { sort: { timestamp: -1 } },
-    );
-
-    const scenarioContext = awaitScenarioTurn?.userMessage ?? "";
-    const userGoal = questionTurn?.userMessage ?? "";
-
-    const motivationText = await generateFutureMotivation(
-      groq,
-      scenarioContext,
-      userGoal,
-      lifeStage,
-    );
-
-    const followUpInquiry = await generateFutureFollowUp(
-      groq,
-      scenarioContext,
-      lifeStage,
-    );
-
-    const motivation: AIResponse = {
-      summary: motivationText,
-      inquiry: followUpInquiry,
-      suggestion: "",
-    };
-
-    await saveTurn(
-      db,
-      userId,
-      resolvedScenarioId,
-      original,
-      motivation,
-      "FOLLOW_UP",
-      "FUTURE",
-      awaitScenarioTurn?._id,
-    );
-    return motivation;
-  }
-
-  /* ---------- FUTURE: ASK_HELP → UNRECOGNIZED → treat as NO ---------- */
+  /* ---------- FUTURE: ASK_HELP → NO or UNRECOGNIZED ---------- */
   if (currentStage === "ASK_HELP") {
     const awaitScenarioTurn = await resolveScenarioTurn(
-      db,
-      userId,
-      resolvedScenarioId,
-      lastTurn!.parentTurnId,
+      db, userId, resolvedScenarioId, lastTurn!.parentTurnId,
     );
-
     const questionTurn = await db.collection("chat_history").findOne(
       { userId, scenarioId: resolvedScenarioId, stage: "QUESTION" },
       { sort: { timestamp: -1 } },
     );
-
     const scenarioContext = awaitScenarioTurn?.userMessage ?? "";
     const userGoal = questionTurn?.userMessage ?? "";
 
-    const motivationText = await generateFutureMotivation(
-      groq,
-      scenarioContext,
-      userGoal,
-      lifeStage,
-    );
-
-    const followUpInquiry = await generateFutureFollowUp(
-      groq,
-      scenarioContext,
-      lifeStage,
-    );
-
-    const motivation: AIResponse = {
-      summary: motivationText,
-      inquiry: followUpInquiry,
-      suggestion: "",
-    };
+    const motivationText = await generateFutureMotivation(groq, scenarioContext, userGoal, lifeStage);
+    const followUpInquiry = await generateFutureFollowUp(groq, scenarioContext, lifeStage);
+    const motivation: AIResponse = { summary: motivationText, inquiry: followUpInquiry, suggestion: "" };
 
     await saveTurn(
-      db,
-      userId,
-      resolvedScenarioId,
-      original,
-      motivation,
-      "FOLLOW_UP",
-      "FUTURE",
-      awaitScenarioTurn?._id,
+      db, userId, resolvedScenarioId, original, motivation,
+      "FOLLOW_UP", "FUTURE", awaitScenarioTurn?._id,
     );
     return motivation;
   }
 
-  /* ---------- FOLLOW_UP → YES → new scenario (same mode) ---------- */
+  /* ---------- FOLLOW_UP → YES → prompt mode selection (don't lock mode) ---------- */
   if (currentStage === "FOLLOW_UP" && YES_REGEX.test(trimmed)) {
-    const scenarioType = (lastTurn!.scenarioType ?? "PAST") as "PAST" | "FUTURE";
-    const promptLabels: Record<string, string> = {
-      PAST: "Okay. Describe the next situation you'd like to reflect on.",
-      FUTURE: "Okay. Describe the next situation you're thinking about.",
-    };
-
+    // Return a prompt but do NOT save AWAIT_SCENARIO here.
+    // saveModeSelection() will save it after the user taps Past or Future.
     const response: AIResponse = {
-      summary: promptLabels[scenarioType],
+      summary: "CHOOSE_MODE",
       inquiry: "",
       suggestion: "",
     };
-
-    await saveTurn(
-      db,
-      userId,
-      resolvedScenarioId,
-      original,
-      response,
-      "AWAIT_SCENARIO",
-      scenarioType,
-    );
+    // Just close the current flow so saveModeSelection can insert fresh
+    await saveTurn(db, userId, resolvedScenarioId, original, response, "CLOSED");
     return response;
   }
 
-  /* ---------- FALLBACK ---------- */
+  /* ---------- FALLBACK — should rarely trigger now ---------- */
+  // If we reach here the DB state is stale/unrecognized. Reset and prompt mode selection.
+  await db.collection("chat_history").updateMany(
+    { userId, scenarioId: resolvedScenarioId },
+    { $set: { stage: "CLOSED" } },
+  );
+
   return {
-    summary:
-      'Type "past" to reflect on something that happened, or "future" to prepare for something coming up.',
+    summary: "Let's start fresh. Choose Past or Future to begin.",
     inquiry: "",
     suggestion: "",
   };
